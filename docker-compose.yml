@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  accountservice:
+    build:
+      context: ./AccountService
+      dockerfile: Dockerfile
+    ports:
+      - "5001:80"
+
+  characterservice:
+    build:
+      context: ./CharacterService
+      dockerfile: Dockerfile
+    ports:
+      - "5002:80"
+
+  combatservice:
+    build:
+      context: ./CombatService
+      dockerfile: Dockerfile
+    ports:
+      - "5003:80"
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "YourStrong@Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
