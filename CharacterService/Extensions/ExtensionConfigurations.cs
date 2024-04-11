@@ -1,7 +1,6 @@
 ﻿using CharacterService.Data;
 using CharacterService.Models;
 using Microsoft.EntityFrameworkCore;
-using RabbitMQ.Client;
 
 namespace CharacterService.Extensions;
 
@@ -84,22 +83,5 @@ public static class ExtensionConfigurations
                 context.SaveChanges();
             }
         }
-    }
-
-    public static void AddRabbitMQ(this WebApplicationBuilder builder, Action<ConnectionFactory> configureConnectionFactory)
-    {
-        // Create and configure the connection factory
-        var connectionFactory = new ConnectionFactory();
-        configureConnectionFactory(connectionFactory);
-
-        // Create the connection and channel
-        var connection = connectionFactory.CreateConnection();
-        var channel = connection.CreateModel();
-
-        // Declare an exchange (you can also declare queues and bindings here if needed)
-        channel.ExchangeDeclare(exchange: "character_exchange", type: ExchangeType.Topic);
-
-        // Register the channel as a singleton service
-        builder.Services.AddSingleton(channel);
     }
 }

@@ -3,22 +3,18 @@ using CharacterService.Models;
 using CharacterService.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Channels;
 
 namespace CharacterService.Services;
 
 public class CharacterService(CharacterDbContext context,
     IDistributedCache cache,
-    JsonSerializerOptions jsonOptions,
-    IModel channel) : ICharacterService
+    JsonSerializerOptions jsonOptions) : ICharacterService
 {
     private readonly CharacterDbContext _context = context;
     private readonly IDistributedCache _cache = cache;
     private readonly JsonSerializerOptions _jsonOptions = jsonOptions;
-    private readonly IModel _channel = channel;
 
     public async Task<IEnumerable<CharacterDto>> GetCharactersAsync()
     {
@@ -102,32 +98,12 @@ public class CharacterService(CharacterDbContext context,
         _context.Characters.Add(character);
         await _context.SaveChangesAsync();
 
-        // Publish character creation message to RabbitMQ
-        PublishCharacterCreationMessage(character);
-
         return new CharacterDetailDto
         {
             Id = character.Id,
             Name = character.Name,
             // Other properties...
         };
-    }
-
-    private void PublishCharacterCreationMessage(Character character)
-    {
-        var message = new
-        {
-            CharacterId = character.Id,
-            UserId = character.CreatedById
-        };
-        var messageBody = JsonSerializer.Serialize(message);
-        var body = Encoding.UTF8.GetBytes(messageBody);
-
-        // Assuming you have a RabbitMQ channel set up and available
-        _channel.BasicPublish(exchange: "character_exchange",
-                             routingKey: "character.created",
-                             basicProperties: null,
-                             body: body);
     }
 
     public async Task<IEnumerable<ItemDto>> GetItemsAsync()

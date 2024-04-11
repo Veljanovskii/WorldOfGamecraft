@@ -4,7 +4,6 @@ using CharacterService.Models.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Moq;
-using RabbitMQ.Client;
 using System.Text.Json;
 
 namespace CharacterTests;
@@ -20,8 +19,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "GetCharactersTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
-
         using (var context = new CharacterDbContext(options))
         {
             context.Characters.Add(new Character { Id = 1, Name = "Test Character 1" });
@@ -33,8 +30,7 @@ public class Tests
         {
             var service = new CharacterService.Services.CharacterService(context,
                 new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(),
-                mockChannel.Object);
+                new JsonSerializerOptions());
 
             // Act
             var characters = await service.GetCharactersAsync();
@@ -56,7 +52,6 @@ public class Tests
             .Options;
 
         var mockCache = new Mock<IDistributedCache>();
-        var mockChannel = new Mock<IModel>();
 
         var character = new Character { Id = 1, Name = "Test Character" };
 
@@ -70,8 +65,7 @@ public class Tests
         {
             var characterService = new CharacterService.Services.CharacterService(context, 
                 mockCache.Object, 
-                new JsonSerializerOptions(),
-                mockChannel.Object);
+                new JsonSerializerOptions());
 
             // Act
             var result = await characterService.GetCharacterByIdAsync(1);
@@ -90,7 +84,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "CreateCharacterTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
         var characterDto = new CharacterCreateDto
         {
             Name = "New Character",
@@ -109,8 +102,7 @@ public class Tests
         {
             var service = new CharacterService.Services.CharacterService(context, 
                 new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(), 
-                mockChannel.Object);
+                new JsonSerializerOptions());
 
             // Act
             var result = await service.CreateCharacterAsync(characterDto, createdById);
@@ -130,7 +122,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "GetItemsTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
         using (var context = new CharacterDbContext(options))
         {
             context.Items.Add(new Item { Name = "Test Item", Description = "A test item", BonusStrength = 5 });
@@ -141,8 +132,7 @@ public class Tests
         {
             var service = new CharacterService.Services.CharacterService(context, 
                 new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(), 
-                mockChannel.Object);
+                new JsonSerializerOptions());
 
             // Act
             var items = await service.GetItemsAsync();
@@ -161,7 +151,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "CreateItemTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
         var itemDto = new ItemCreateDto
         {
             Name = "New Item",
@@ -172,9 +161,8 @@ public class Tests
         using (var context = new CharacterDbContext(options))
         {
             var service = new CharacterService.Services.CharacterService(context, 
-                new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(), 
-                mockChannel.Object);
+                new Mock<IDistributedCache>().Object,
+                new JsonSerializerOptions());
 
             // Act
             var result = await service.CreateItemAsync(itemDto);
@@ -195,7 +183,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "GrantItemTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
         var character = new Character { Id = 1, Name = "Test Character" };
         var item = new Item { Id = 1, Name = "Test Item", Description = "Test Item Description" };
 
@@ -210,8 +197,7 @@ public class Tests
         {
             var service = new CharacterService.Services.CharacterService(context, 
                 new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(), 
-                mockChannel.Object);
+                new JsonSerializerOptions());
 
             // Act
             var result = await service.GrantItemAsync(new ItemGrantDto { CharacterId = 1, ItemId = 1 });
@@ -230,7 +216,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "GiftItemTestDb")
             .Options;
 
-        var mockChannel = new Mock<IModel>();
         var fromCharacter = new Character { Id = 1, Name = "From Character", Items = new List<Item>() };
         var toCharacter = new Character { Id = 2, Name = "To Character", Items = new List<Item>() };
         var item = new Item { Id = 1, Name = "Test Item", Description = "Test Item Description" };
@@ -245,9 +230,8 @@ public class Tests
         using (var context = new CharacterDbContext(options))
         {
             var service = new CharacterService.Services.CharacterService(context, 
-                new Mock<IDistributedCache>().Object, 
-                new JsonSerializerOptions(), 
-                mockChannel.Object);
+                new Mock<IDistributedCache>().Object,
+                new JsonSerializerOptions());
 
             // Act
             var result = await service.GiftItemAsync(new ItemGiftDto { FromCharacterId = 1, ToCharacterId = 2, ItemId = 1 });
