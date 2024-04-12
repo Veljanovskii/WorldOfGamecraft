@@ -51,8 +51,6 @@ public class Tests
             .UseInMemoryDatabase(databaseName: "CharacterTestDb")
             .Options;
 
-        var mockCache = new Mock<IDistributedCache>();
-
         var character = new Character { Id = 1, Name = "Test Character" };
 
         using (var context = new CharacterDbContext(options))
@@ -63,8 +61,8 @@ public class Tests
 
         using (var context = new CharacterDbContext(options))
         {
-            var characterService = new CharacterService.Services.CharacterService(context, 
-                mockCache.Object, 
+            var characterService = new CharacterService.Services.CharacterService(context,
+                new Mock<IDistributedCache>().Object, 
                 new JsonSerializerOptions());
 
             // Act

@@ -1,7 +1,6 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -9,17 +8,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Character Service/CharacterService.csproj", "Character Service/"]
-RUN dotnet restore "./Character Service/CharacterService.csproj"
+COPY ["CharacterService.csproj", "./"]
+RUN dotnet restore "CharacterService.csproj"
 COPY . .
-WORKDIR "/src/Character Service"
-RUN dotnet build "./CharacterService.csproj" -c $BUILD_CONFIGURATION -o /app/build
+RUN dotnet build "CharacterService.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./CharacterService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "CharacterService.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "CharacterService.dll"]
+COPY wait-for-it.sh ./wait-for-it.sh
+RUN chmod +x ./wait-for-it.sh
+USER app
+ENTRYPOINT ["./wait-for-it.sh", "sqlserver:1433", "--timeout=30", "--", "dotnet", "CharacterService.dll"]

@@ -31,22 +31,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ClockSkew = TimeSpan.Zero
         };
     });
-//builder.AddRabbitMQ(config =>
-//{
-//    config.HostName = "localhost";
-//});
-
 
 var app = builder.Build();
 
 app.ApplyMigrations();
 app.SeedData();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
