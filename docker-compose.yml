@@ -7,8 +7,11 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__AccountServiceDatabase: "Server=sqlserver;Database=AccountDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true"
+      ASPNETCORE_URLS: "https://+443"
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: WorldOfGamecraft
     ports:
-      - "5001:80"
+      - "5001:443"
     depends_on:
       - sqlserver
 
@@ -20,8 +23,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__CharacterServiceDatabase: "Server=sqlserver;Database=CharacterDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=true"
       ConnectionStrings__Redis: redis:6379
+      ASPNETCORE_URLS: "https://+443"
+      ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
+      ASPNETCORE_Kestrel__Certificates__Default__Password: WorldOfGamecraft
     ports:
-      - "5002:80"
+      - "5002:443"
     depends_on:
       - sqlserver
       - redis
